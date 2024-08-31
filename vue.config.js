@@ -15,11 +15,13 @@ module.exports = {
     assetsDir: 'static/',
     runtimeCompiler: true,
     transpileDependencies: ['irc-framework', 'ip-regex', 'isomorphic-textencoder'],
-    productionSourceMap: makeSourceMap,
+    productionSourceMap: true,
     css: {
         sourceMap: makeSourceMap,
     },
     configureWebpack: {
+        devtool: 'source-map',
+
         resolve: {
             extensions: ['.js', '.vue', '.json'],
             alias: {

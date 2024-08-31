@@ -23,8 +23,8 @@ module.exports = {
     ],
     // add your custom rules here
     rules: {
-        'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-        'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+        'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+        'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
         'rulesdir/class-name-prefix': 'warn',
         'class-methods-use-this': 0,
         'comma-dangle': ['error', {
@@ -77,6 +77,7 @@ module.exports = {
         'vuejs-accessibility/interactive-supports-focus': 0,
         'vuejs-accessibility/label-has-for': 0,
         'vuejs-accessibility/mouse-events-have-key-events': 0,
+        "linebreak-style": 0
     },
     overrides: [{
         files: [
