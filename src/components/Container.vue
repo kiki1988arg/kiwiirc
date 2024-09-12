@@ -34,7 +34,6 @@
                 :buffer="buffer"
                 :network="buffer.getNetwork()"
             />
-
             <div class="kiwi-container-content">
                 <template v-if="buffer.isServer()">
                     <server-view :network="network" />

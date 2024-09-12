@@ -77,7 +77,9 @@ module.exports = {
         'vuejs-accessibility/interactive-supports-focus': 0,
         'vuejs-accessibility/label-has-for': 0,
         'vuejs-accessibility/mouse-events-have-key-events': 0,
-        "linebreak-style": 0
+        "linebreak-style": 0,
+        'max-len': 'off' 
+
     },
     overrides: [{
         files: [

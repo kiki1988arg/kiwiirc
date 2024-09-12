@@ -6,7 +6,6 @@
         }"
         v-bind="dataAttributes"
         class="kiwi-nicklist-user"
-        @click.stop="nicklist.openUserbox(user)"
     >
         <div v-if="nicklist.shouldShowAvatars" class="kiwi-nicklist-avatar">
             <UserAvatar
@@ -27,7 +26,10 @@
         <span
             class="kiwi-nicklist-user-nick"
             :style="{ color: userColour }"
-        >{{ user.nick }} </span>
+            @click.stop="nicklist.openUserbox(user)"
+        >{{ user.nick }}</span>
+        <span><i style="padding-left: 10px;" v-if="user.nick.includes('a')" @click.stop="nicklist.requestPermision(user,'public')" aria-hidden="true" class="fa fa-video-camera"></i></span>        
+        <span style="color: red;"><i style="padding-left: 10px;" v-if="user.nick.includes('b')" @click.stop="nicklist.requestPermision(user,'private')" aria-hidden="true" class="fa fa-video-camera" ></i></span>
         <div class="kiwi-nicklist-user-buttons">
             <svg
                 xmlns="http://www.w3.org/2000/svg"

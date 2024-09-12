@@ -1,63 +1,41 @@
 <template>
-    <div
-        :class="{
-            'kiwi-wrap--statebrowser-drawopen': stateBrowserDrawOpen,
-            'kiwi-wrap--monospace': $state.setting('useMonospace'),
-            'kiwi-wrap--touch': $state.ui.is_touch,
-        }"
-        :data-activebuffer="buffer ? buffer.name.toLowerCase() : ''"
-        class="kiwi-wrap kiwi-theme-bg"
-        @click="emitDocumentClick"
-        @paste.capture="emitBufferPaste"
-    >
+    <div :class="{
+        'kiwi-wrap--statebrowser-drawopen': stateBrowserDrawOpen,
+        'kiwi-wrap--monospace': $state.setting('useMonospace'),
+        'kiwi-wrap--touch': $state.ui.is_touch,
+    }" :data-activebuffer="buffer ? buffer.name.toLowerCase() : ''" class="kiwi-wrap kiwi-theme-bg"
+        @click="emitDocumentClick" @paste.capture="emitBufferPaste">
         <template v-if="!hasStarted || (!fallbackComponent && networks.length === 0)">
             <component :is="startupComponent" @start="startUp" />
         </template>
         <template v-else>
+            <PopUpList />
             <state-browser :networks="networks" :sidebar-state="sidebarState" />
-            <div
-                :class="{
-                    'kiwi-workspace--disconnected': network && network.state !== 'connected'
-                }"
-                class="kiwi-workspace"
-                @click="stateBrowserDrawOpen = false"
-            >
+            <div :class="{
+                'kiwi-workspace--disconnected': network && network.state !== 'connected'
+            }" class="kiwi-workspace" @click="stateBrowserDrawOpen = false">
                 <div class="kiwi-workspace-background" />
 
                 <template v-if="!activeComponent && network">
-                    <container
-                        :network="network"
-                        :buffer="buffer"
-                        :sidebar-state="sidebarState"
-                    >
+                    <container :network="network" :buffer="buffer" :sidebar-state="sidebarState">
                         <template v-if="mediaviewerOpen" #before>
-                            <media-viewer
-                                :url="mediaviewerUrl"
-                                :component="mediaviewerComponent"
-                                :component-props="mediaviewerComponentProps"
-                                :is-iframe="mediaviewerIframe"
+                            <media-viewer :url="mediaviewerUrl" :component="mediaviewerComponent"
+                                :component-props="mediaviewerComponentProps" :is-iframe="mediaviewerIframe"
                                 class="kiwi-main-mediaviewer"
-                                @close="$state.$emit('mediaviewer.hide', { source: 'user' });"
-                            />
+                                @close="$state.$emit('mediaviewer.hide', { source: 'user' });" />
                         </template>
                     </container>
-                    <control-input
-                        v-if="buffer.show_input"
-                        :network="network"
-                        :buffer="buffer"
-                        :sidebar-state="sidebarState"
-                    />
+                    <control-input v-if="buffer.show_input" :network="network" :buffer="buffer"
+                        :sidebar-state="sidebarState" />
                 </template>
-                <component
-                    :is="fallbackComponent"
-                    v-else-if="!activeComponent"
-                    v-bind="fallbackComponentProps"
-                />
+                <component :is="fallbackComponent" v-else-if="!activeComponent" v-bind="fallbackComponentProps" />
                 <component :is="activeComponent" v-else v-bind="activeComponentProps" />
             </div>
         </template>
         <AvatarCommon />
+
     </div>
+
 </template>
 
 <script>
@@ -72,6 +50,7 @@ import Container from '@/components/Container';
 import ControlInput from '@/components/ControlInput';
 import MediaViewer from '@/components/MediaViewer';
 import AvatarCommon from '@/components/UserAvatarCommon';
+import PopUpList from '@/components/PopUpList.vue';
 import { State as SidebarState } from '@/components/Sidebar';
 import * as Notifications from '@/libs/Notifications';
 import * as bufferTools from '@/libs/bufferTools';
@@ -86,6 +65,7 @@ export default {
         ControlInput,
         MediaViewer,
         AvatarCommon,
+        PopUpList,
     },
     props: ['startupComponent'],
     data() {
@@ -446,7 +426,8 @@ body {
     left: 0;
     width: 220px;
     bottom: 0;
-    z-index: 11; /* Must be at least 1 higher than the workspace :after z-index; */
+    z-index: 0;
+    /* Must be at least 1 higher than the workspace :after z-index; */
     transition: left 0.145s, margin-left 0.145s;
 }
 

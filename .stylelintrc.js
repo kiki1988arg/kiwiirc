@@ -17,5 +17,6 @@ module.exports = {
         'selector-class-pattern': null,
         'shorthand-property-no-redundant-values': null,
         'string-quotes': 'single',
+      
     },
 };

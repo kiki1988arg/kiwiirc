@@ -30,6 +30,7 @@
             :items="sortedUsers"
             :item-size="shouldShowAvatars ? 38 : 26"
             :key-field="'id'"
+
             class="kiwi-nicklist-users"
         >
             <template #default="{ item }">
@@ -190,6 +191,11 @@ export default {
                 this.userFilter = '';
                 this.userFilterVisible = false;
             }
+        },
+        requestPermision(user,camState) {
+            this.$state.$emit('request.'+camState, user, this.network, {
+                buffer: this.buffer,
+            });
         },
     },
 };

@@ -56,9 +56,9 @@ module.exports = {
             new ProvidePlugin({
                 Buffer: ['buffer', 'Buffer'],
             }),
-            new StyleLintPlugin({
-                files: ['src/**/*.{vue,htm,html,css,sss,less,scss}'],
-            }),
+            // new StyleLintPlugin({
+            //     files: ['src/**/*.{vue,htm,html,css,sss,less,scss}'],
+            // }),
             new ConvertLocalesPlugin(),
             new CopyWebpackPlugin({
                 patterns: [

@@ -3,6 +3,7 @@
   "version": "1.7.1",
   "description": "Web based IRC client",
   "author": "Darren <darren@darrenwhitlen.com>",
+  
   "scripts": {
     "build": "vue-cli-service build --no-module",
     "test:unit": "vue-cli-service test:unit",
@@ -11,7 +12,8 @@
     "lint:stylelint": "stylelint \"src/**/*.{vue,htm,html,css,sss,less,scss}\"",
     "dev": "vue-cli-service serve",
     "test": "vue-cli-service test:unit",
-    "gendocs": "rm -rf srcdocs/ && jsdoc -c jsdoc.json"
+    "gendocs": "rm -rf srcdocs/ && jsdoc -c jsdoc.json",
+    "plu": "vue-cli-service build --target wc-async --name App-foo ./static/plugins/*.vue"
   },
   "dependencies": {
     "@babel/runtime-corejs3": "^7.22.6",
