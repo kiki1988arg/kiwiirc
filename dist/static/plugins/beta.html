@@ -1,0 +1,345 @@
+<script>
+    kiwi.plugin('active-cam', function (kiwi, log) {
+        kiwi.Vue.component('button-counter', {
+            template: `
+                <div class="container">
+                    <div class="iframe-container" style="position: relative">
+                        <iframe style="width: 100%; height:100%" v-if="isPreviewVisible" id="camera-preview" :src="getIframe()" frameborder="0" allow="camera; microphone"></iframe>
+                    </div>
+                    <div class="button-container">
+                        <button @click="setPrivateWebcam">Webcam Privada</button>
+                        <button @click="setPublicWebcam">Webcam Pública</button>
+                        
+                        <!-- Botones para usuarios aceptados -->
+                        <div v-if="acceptedUsers.length" class="accepted-users">
+                            <h3>ME MIRAN</h3>
+                            <div v-for="user in acceptedUsers" :key="user" class="user-button">
+                                <button @click="confirmHideCamera(user)">{{ user }}</button>
+                            </div>
+                        </div>
+                        <!-- Botones para usuarios que han enviado el mensaje "TE MIRO" -->
+                        <div v-if="requestedUsers.length" class="requested-users">
+                            <h3>ME MIRAN (CAM PUBLICA)</h3>
+                            <div v-for="user in requestedUsers" :key="user" class="user-button">
+                                <button @click="confirmRemoveRequest(user)">{{ user }}</button>
+                            </div>
+                        </div>
+                        <!-- Modal para mostrar el notice -->
+                        <div v-if="showModal" class="modal-overlay">
+                            <div class="modal">
+                                <h2>Solicitud de WebCam</h2>
+                                <p>El usuario {{ nick }} ha solicitado compartir su webcam. ¿Qué deseas hacer?</p>
+                                <button @click="acceptRequest">Aceptar</button>
+                                <button @click="rejectRequest">Rechazar</button>
+                            </div>
+                        </div>
+                        <!-- Modal para confirmar ocultar cámara -->
+                        <div v-if="showHideModal" class="confirm-overlay">
+                            <div class="confirm-modal">
+                                <h2>Confirmar Ocultar Cámara</h2>
+                                <p>¿Deseas ocultar la cámara del usuario {{ selectedUser }}?</p>
+                                <button @click="hideCamera">Sí</button>
+                                <button @click="cancelHideCamera">No</button>
+                            </div>
+                        </div>
+                        <!-- Modal para confirmar eliminación de solicitud -->
+                        <div v-if="showRemoveModal" class="confirm-overlay">
+                            <div class="confirm-modal">
+                                <h2>Confirmar Eliminación</h2>
+                                <p>¿Deseas eliminar al usuario {{ selectedUser }} y su solicitud?</p>
+                                <button @click="removeRequest">Sí</button>
+                                <button @click="cancelRemoveRequest">No</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    isPreviewVisible: false,
+                    iframeElement: null,
+                    permissionsGranted: false,
+                    valor1: '',
+                    nick: '',
+                    showModal: false,
+                    acceptedUser: null,
+                    acceptedUsers: [],
+                    requestedUsers: [],
+                    showHideModal: false,
+                    showRemoveModal: false,
+                    selectedUser: ''
+                };
+            },
+            methods: {
+                getIframe() {
+                    return 'https://irc.chateachat.com:3000/broadcast.html?user=' + this.$state.getActiveNetwork().nick;
+                },
+                startCamera() {
+                    this.isPreviewVisible = true;
+                    this.requestPermissions();
+                },
+                requestPermissions() {
+                    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                        .then(() => {
+                            this.permissionsGranted = true;
+                            this.showCamera();
+                        })
+                        .catch(error => {
+                            console.error('Error al solicitar permisos:', error);
+                            this.permissionsGranted = false;
+                            alert('Permisos de cámara no concedidos.');
+                        });
+                },
+                showCamera() {
+                    this.iframeElement = document.getElementById('camera-preview');
+                    if (this.iframeElement) {
+                        this.iframeElement.style.display = 'block'; // Muestra el iframe
+                        this.valor1 = 'https://irc.chateachat.com:3000/?user=' + this.$state.getActiveNetwork().nick;
+                        const network = this.$state.getActiveNetwork();
+                        if (network && this.valor1) {
+                            network.ircClient.raw(`setname ${this.valor1}`);
+                        } else {
+                            console.error('Red activa o valor1 no disponible.');
+                        }
+                    } else {
+                        console.error('El iframe no se encontró en el DOM.');
+                    }
+                },
+                removeIframe() {
+                    const iframe = document.getElementById('camera-preview');
+                    if (iframe) {
+                        iframe.remove(); // Elimina el iframe del DOM
+                    }
+                },
+                setPrivateWebcam() {
+                    const network = this.$state.getActiveNetwork();
+                    if (network) {
+                        alert("ACTIVASTE LA CAM PRIVADA");
+                        network.ircClient.raw('SETNAME CAMPRIVADA');
+                    }
+                },
+                setPublicWebcam() {
+                    const network = this.$state.getActiveNetwork();
+                    if (network) {
+                        this.valor1 = 'https://irc.chateachat.com:3000/?user=' + this.$state.getActiveNetwork().nick;
+                        network.ircClient.raw(`setname ${this.valor1}`);
+                    }
+                },
+                generateKey() {
+                    const key = Math.floor(100000 + Math.random() * 900000);
+                    this.$root.$emit('keyGenerated', key);
+                    alert(`Clave generada: ${key}`);
+                },
+                handleNotice(message) {
+                    console.log('Mensaje recibido:', message);
+    
+                    if (message && message.message && message.message.includes('PUEDO')) {
+                        this.nick = message.nick || 'desconocido';
+                        console.log('Nick extraído:', this.nick);
+                        this.showModal = true;
+                        this.acceptedUser = this.nick;
+                    } else if (message && message.message && message.message.includes('MIRAR')) {
+                        const user = message.nick;
+                        this.nick = message.nick || 'desconocido';
+                        console.log('Nick extraído:', this.nick);
+    
+                        // Añadir usuario automáticamente a la lista de aceptados
+                        if (user && !this.acceptedUsers.includes(user)) {
+                            this.acceptedUsers.push(user);
+                        }
+    
+                        const network = this.$state.getActiveNetwork();
+                        if (network) {
+                            const iframeUrl = 'https://irc.chateachat.com:3000/?user=' + network.nick;
+                            console.log(iframeUrl);
+                            network.ircClient.raw(`NOTICE ${user} SHOWCAMERA ${iframeUrl}`);
+                        }
+                    } else if (message && message.message && message.message.startsWith('HIDE ')) {
+                        const user = message.message.split(' ')[1];
+                        if (user) {
+                            this.acceptedUsers = this.acceptedUsers.filter(u => u !== user);
+                            if (this.selectedUser === user) {
+                                this.showHideModal = false;
+                            }
+                        }
+                    }
+                },
+                acceptRequest() {
+                    console.log(`Solicitud de ${this.nick} aceptada`);
+                    this.showModal = false;
+    
+                    if (this.acceptedUser && !this.acceptedUsers.includes(this.acceptedUser)) {
+                        this.acceptedUsers.push(this.acceptedUser);
+                    }
+    
+                    const network = this.$state.getActiveNetwork();
+                    if (network) {
+                        const iframeUrl = 'https://irc.chateachat.com:3000/?user=' + network.nick;
+                        console.log(iframeUrl);
+                        network.ircClient.raw(`NOTICE ${this.acceptedUser} SHOWCAMERA ${iframeUrl}`);
+                    }
+                },
+                rejectRequest() {
+                    console.log(`Solicitud de ${this.nick} rechazada`);
+                    this.showModal = false;
+                },
+                confirmHideCamera(user) {
+                    this.selectedUser = user;
+                    this.showHideModal = true;
+                },
+                hideCamera() {
+                    if (this.selectedUser && this.acceptedUsers.includes(this.selectedUser)) {
+                        const network = this.$state.getActiveNetwork();
+                        if (network) {
+                            network.ircClient.raw(`NOTICE ${this.selectedUser} HIDE`);
+                            this.acceptedUsers = this.acceptedUsers.filter(user => user !== this.selectedUser);
+                            this.selectedUser = '';
+                        }
+                    }
+                    this.showHideModal = false;
+                },
+                cancelHideCamera() {
+                    this.showHideModal = false;
+                },
+                confirmRemoveRequest(user) {
+                    this.selectedUser = user;
+                    this.showRemoveModal = true;
+                },
+                removeRequest() {
+                    if (this.selectedUser && this.requestedUsers.includes(this.selectedUser)) {
+                        const network = this.$state.getActiveNetwork();
+                        if (network) {
+                            network.ircClient.raw(`NOTICE ${this.selectedUser} HIDE`);
+                            this.requestedUsers = this.requestedUsers.filter(user => user !== this.selectedUser);
+                            this.selectedUser = '';
+                        }
+                    }
+                    this.showRemoveModal = false;
+                },
+                cancelRemoveRequest() {
+                    this.showRemoveModal = false;
+                }
+            },
+            beforeDestroy() {
+                this.removeIframe(); // Asegúrate de eliminar el iframe al destruir el componente
+                const network = this.$state.getActiveNetwork();
+                    if (network) {
+                        network.ircClient.raw('SETNAME ' + this.$state.getActiveNetwork().nick);
+                    }
+            },
+            mounted() {
+                this.startCamera(); // Inicia la cámara automáticamente
+                const iframe = document.getElementById("camera-preview");
+                if (iframe) {
+                    iframe.onload = () => {
+                        iframe.width = iframe.contentWindow.document.body.scrollWidth;
+                        iframe.height = iframe.contentWindow.document.body.scrollHeight;
+                    };
+                }
+                const network = this.$state.getActiveNetwork();
+                if (network) {
+                    network.ircClient.on('notice', (message) => this.handleNotice(message));
+                }
+            },
+        });
+    
+        function loginFn() {
+            kiwi.state.$emit('mediaviewer.show', { component: 'button-counter' });
+        }
+    
+        const loginBtn = document.createElement('a');
+        loginBtn.innerHTML = '<i class="fa fa-video-camera" aria-hidden="true"></i>';
+        loginBtn.addEventListener("click", loginFn);
+        kiwi.addUi('header_channel', loginBtn);
+        kiwi.addUi('header_query', loginBtn);
+
+    });
+    </script>
+    
+    <style>
+        div.container {
+            display: flex;
+            align-items: stretch;
+            height: 400px;
+            background: url(https://icons.iconarchive.com/icons/iconshock/super-vista-general/48/webcam-icon.png);
+        }
+    
+    .iframe-overlay {
+    position: relative;
+    height:300px;
+    
+    }
+    
+    
+    
+        .iframe-container {
+            flex: 3; /* Ajusta el tamaño del iframe-container si es necesario */
+            position: relative;
+            height: 100%;
+            padding-right: 10px; /* Espacio entre el iframe y el contenedor de botones */
+        }
+    
+        .button-container {
+            flex: 1; /* Hace que el botón-container ocupe el espacio restante */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start; /* Alinea los botones al inicio (izquierda) */
+            padding: 10px; /* Añade un poco de espacio interno */
+            box-sizing: border-box;
+            height: 100%;
+        }
+    
+        .button-container button {
+            margin-bottom: 10px; /* Espacio entre los botones */
+            width: 100%; /* Botones ocupan todo el ancho del contenedor */
+        }
+    
+        .accepted-users, .requested-users {
+            margin-top: 20px;
+            width: 100%; /* Asegura que las listas ocupen todo el ancho del contenedor */
+        }
+    
+        .user-button {
+            margin-bottom: 10px;
+            width: 100%; /* Asegura que los botones ocupen todo el ancho del contenedor */
+        }
+    
+        .confirm-overlay, .modal-overlay {
+            position: relative; /* Usa 'fixed' para asegurarse de que el modal esté en la parte superior de la vista */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 300px;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+    
+        .confirm-modal, .modal {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    
+        .confirm-modal button, .modal button {
+            margin: 5px;
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    
+        .confirm-modal button:hover, .modal button:hover {
+            background: #0056b3;
+        }
+    </style>
+    
