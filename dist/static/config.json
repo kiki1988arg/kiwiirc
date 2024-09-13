@@ -47,7 +47,6 @@
             "name": "customise",
             "url": "/static/plugins/customise.js"
         },
-
         {
             "name": "img",
             "url": "static/plugins/Img.js"
@@ -73,8 +72,8 @@
     "startupOptions": {
         "channel": "#kiwiirc-default",
         "nick": "kiwi-bbb?",
-        "server": "irc.freenode.net",
-        "port": 6697
+        "server": "irc.chathispano.com",
+        "port": 6900
 
     },
     "embedly": {

@@ -1,0 +1,82 @@
+{
+    "windowTitle": "Kiwi IRC - The web IRC client",
+    "startupScreen": "welcome",
+    "kiwiServer": "https://do-e.clients.kiwiirc.com/webirc/kiwiirc/?p=1",
+    "restricted": true,
+    "theme": "Default",
+    "themes": [
+        {
+            "name": "Default",
+            "url": "static/themes/default"
+        },
+        {
+            "name": "Dark",
+            "url": "static/themes/dark"
+        },
+        {
+            "name": "Coffee",
+            "url": "static/themes/coffee"
+        },
+        {
+            "name": "GrayFox",
+            "url": "static/themes/grayfox"
+        },
+        {
+            "name": "Nightswatch",
+            "url": "static/themes/nightswatch"
+        },
+        {
+            "name": "Osprey",
+            "url": "static/themes/osprey"
+        },
+        {
+            "name": "Radioactive",
+            "url": "static/themes/radioactive"
+        },
+        {
+            "name": "Sky",
+            "url": "static/themes/sky"
+        },
+        {
+            "name": "Elite",
+            "url": "static/themes/elite"
+        }
+    ],
+    "plugins": [
+        {
+            "name": "customise",
+            "url": "/static/plugins/customise.js"
+        },
+        {
+            "name": "img",
+            "url": "static/plugins/Img.js"
+        },
+        {
+            "name": "active-cam",
+            "url": "static/plugins/active-cam.html"
+        },
+        {
+            "name": "userbox-iframe",
+            "url": "static/plugins/userbox-iframe.js"
+        },
+        {
+            "name": "Img",
+            "url": "static/plugins/Img.js"
+        }
+        ,
+        {
+            "name": "cam-popup",
+            "url": "static/plugins/cam-popup.js"
+        }
+    ],
+    "startupOptions": {
+        "channel": "#kiwiirc-default",
+        "nick": "kiwi-bbb?",
+        "server": "irc.chathispano.com",
+        "port": 6900
+
+    },
+    "embedly": {
+        "key": ""
+    }
+}
