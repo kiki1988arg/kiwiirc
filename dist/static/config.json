@@ -1,7 +1,7 @@
 {
     "windowTitle": "Kiwi IRC - The web IRC client",
     "startupScreen": "welcome",
-    "kiwiServer": "https://do-e.clients.kiwiirc.com/webirc/kiwiirc/?p=1",
+    "kiwiServer": "https://do-e.clients.kiwiirc.com/webirc/kiwiirc/",
     "restricted": true,
     "theme": "Default",
     "themes": [
@@ -44,24 +44,8 @@
     ],
     "plugins": [
         {
-            "name": "customise",
-            "url": "/static/plugins/customise.js"
-        },
-        {
-            "name": "img",
-            "url": "static/plugins/Img.js"
-        },
-        {
             "name": "active-cam",
-            "url": "static/plugins/active-cam.html"
-        },
-        {
-            "name": "userbox-iframe",
-            "url": "static/plugins/userbox-iframe.js"
-        },
-        {
-            "name": "Img",
-            "url": "static/plugins/Img.js"
+            "url": "static/plugins/active-cam.js"
         }
         ,
         {
@@ -71,9 +55,9 @@
     ],
     "startupOptions": {
         "channel": "#kiwiirc-default",
-        "nick": "kiwi-bbb?",
+        "nick": "Invitado-?",
         "server": "irc.chathispano.com",
-        "port": 6900
+        "port": [6667]
 
     },
     "embedly": {

@@ -1,33 +1,59 @@
 // Usar window.kiwi.user para pasar arrays de camaras
-window.kiwi.viewedUsers = []
-window.kiwi.watchingUsers = []
-window.kiwi.rejectedUsers = []
+window.kiwi.cams = {
+    viewedUsers : [],
+    watchingUsers : [],
+    rejectedUsers : []
+
+}
 
 kiwi.plugin('cam-popup', (kiwi) => {
+
+    function openMediaViewer() {
+        if(document.querySelector('.stream')==null) 
+            kiwi.state.$emit('mediaviewer.show', { component: 'button-counter' });
+
+    }
+
+    
     // Evento cam pública
-    kiwi.on('request.public', (user, network, buffer) => {
-
-        kiwi.viewedUsers.push(user.nick)
-
-
-    })
-
-    // Evento cam privada
-    kiwi.on('request.private', (user, network, buffer) => {
-
-        console.log(user)
-
-        text = `[CAM][REQUEST] ${user.nick} está solicitando permisos para acceder a tu cam`
-
-
+    kiwi.on('cam.request.public', (user, network, buffer) => {
+        if(kiwi.cams.viewedUsers.includes(user.nick))return
+        openMediaViewer();
+        kiwi.cams.viewedUsers.push(user.nick)
+        //Envío al usuario que estoy viendo que lo estoy viendo.
+        text = `[CAM][WATCHING]`
         let message = `NOTICE ${user.nick} ${text}`;
         network.ircClient.raw(message);
-
-
     })
 
+    kiwi.on('message.new', (event) => {
+        let message = event.message;
+        let buffer = event.buffer;
+        if (!isConference(message)) {
+            return;
+        }
 
-    // Listen for new conference message and replace with our component
+        //notificación de qué me estan mirando
+        if (message.message.startsWith('[NOTICE] [CAM][WATCHING]')) {
+            message.template = kiwi.Vue.extend({
+                component: 'PopUp'
+            })
+            kiwi.cams.watchingUsers.push(message.nick)    
+        }  
+         
+    });
+    // FIN Evento cam pública
+
+
+    // Evento cam privada
+    kiwi.on('cam.request.private', (user, network, buffer) => {
+        if(kiwi.cams.watchingUsers.includes(user.nick))return
+        openMediaViewer();
+        text = `[CAM][REQUEST] ${user.nick} está solicitando permisos para acceder a tu cam`
+        let message = `NOTICE ${user.nick} ${text}`;
+        network.ircClient.raw(message);
+    })
+
     kiwi.on('message.new', (event) => {
         let message = event.message;
         let buffer = event.buffer;
@@ -54,14 +80,13 @@ kiwi.plugin('cam-popup', (kiwi) => {
                         switch (state) {
                             case 'reject':
                                 buffer.getNetwork().ircClient.raw('NOTICE', message.nick, '[CAM][NO]');
-                                kiwi.rejectedUsers.push(message.nick);
+                                kiwi.cams.rejectedUsers.push(message.nick);
                                 break;
 
                             case 'accept':
                                 buffer.getNetwork().ircClient.raw('NOTICE', message.nick, '[CAM][OK]');
-                                kiwi.watchingUsers.push(message.nick);
+                                kiwi.cams.watchingUsers.push(message.nick);
                                 break;
-
                         }
 
 
@@ -78,16 +103,72 @@ kiwi.plugin('cam-popup', (kiwi) => {
                 <p style="text-align: center;">El usuario <span style="color:blue">${message.nick}</span> ha rechazado la petición.</p>
                         `,
             })
+            kiwi.cams.rejectedUsers.push(message.nick)
         }
         if (message.message.startsWith('[NOTICE] [CAM][OK]')) {
             message.template = kiwi.Vue.extend({
                 template: '',
             })
-            kiwi.viewedUsers.push(message.nick)
-
+            kiwi.cams.viewedUsers.push(message.nick)
         }
 
+         // Fin Evento cam privada
 
+         // Evento cuando me cierran cam    
+
+        kiwi.on('cam.close', (user,network) => {
+            let message = `NOTICE ${user} [CAM][CLOSE]`;
+            network.ircClient.raw(message);
+            //Envío al usuario que estoy viendo que lo estoy viendo.  
+        })  
+
+        kiwi.on('message.new', (event) => {
+            let message = event.message;
+            let buffer = event.buffer;
+            if (!isConference(message)) {
+                return;
+            }
+    
+            //notificación de qué me estan mirando
+            if (message.message.startsWith('[NOTICE] [CAM][CLOSE]')) {
+                message.template = kiwi.Vue.extend({
+                    template: '',
+                })
+                index = kiwi.cams.watchingUsers.indexOf(message.nick)
+                kiwi.cams.watchingUsers.splice(index,1)    
+            }  
+             
+        });
+        // Fin evento me cierran cam    
+
+        // Evento cuando quiero dejar que alguien me vea
+
+         kiwi.on('cam.close.eye', (user,network) => {
+            let message = `NOTICE ${user.nick} [CAM][CLOSEEYE]`;
+            network.ircClient.raw(message);
+            index = kiwi.cams.watchingUsers.indexOf(message.nick)
+            kiwi.cams.watchingUsers.splice(index,1) 
+            //Envío al usuario que estoy viendo que lo estoy viendo.  
+        })  
+
+        kiwi.on('message.new', (event) => {
+            let message = event.message;
+            let buffer = event.buffer;
+            if (!isConference(message)) {
+                return;
+            }
+    
+            //notificación de qué me estan mirando
+            if (message.message.startsWith('[NOTICE] [CAM][CLOSEEYE]')) {
+                message.template = kiwi.Vue.extend({
+                    template: '',
+                })
+                index = kiwi.cams.viewedUsers.indexOf(message.nick)
+                kiwi.cams.viewedUsers.splice(index,1)    
+            }  
+             
+        });
+        // Evento cuando quiero dejar que alguien me vea   
 
 
     });

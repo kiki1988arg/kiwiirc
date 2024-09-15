@@ -1,61 +1,44 @@
 <template>
-    <div
-        :class="{
-            'kiwi-nicklist-user--away': user.isAway() || user.isOffline(),
-            'kiwi-nicklist-user--ignore': user.ignore,
-        }"
-        v-bind="dataAttributes"
-        class="kiwi-nicklist-user"
-    >
+    <div :class="{
+        'kiwi-nicklist-user--away': user.isAway() || user.isOffline(),
+        'kiwi-nicklist-user--ignore': user.ignore,
+    }" v-bind="dataAttributes" class="kiwi-nicklist-user">
         <div v-if="nicklist.shouldShowAvatars" class="kiwi-nicklist-avatar">
-            <UserAvatar
-                v-bind="nicklist.avatarProps"
-                :user="user"
-                :network="network"
-                size="small"
-            />
+            <UserAvatar v-bind="nicklist.avatarProps" :user="user" :network="network" size="small" />
         </div>
-        <AwayStatusIndicator
-            v-else
-            :network="network"
-            :user="user"
-            :toggle="false"
-            class="kiwi-nicklist-awaystatus"
-        />
+        <AwayStatusIndicator v-else :network="network" :user="user" :toggle="false" class="kiwi-nicklist-awaystatus" />
         <span class="kiwi-nicklist-user-prefix">{{ userModePrefix }}</span>
-        <span
-            class="kiwi-nicklist-user-nick"
-            :style="{ color: userColour }"
-            @click.stop="nicklist.openUserbox(user)"
-        >{{ user.nick }}</span>
-        <span><i style="padding-left: 10px;" v-if="user.nick.includes('a')" @click.stop="nicklist.requestPermision(user,'public')" aria-hidden="true" class="fa fa-video-camera"></i></span>        
-        <span style="color: red;"><i style="padding-left: 10px;" v-if="user.nick.includes('b')" @click.stop="nicklist.requestPermision(user,'private')" aria-hidden="true" class="fa fa-video-camera" ></i></span>
+        <span class="kiwi-nicklist-user-nick" :style="{ color: userColour }" @click.stop="nicklist.openUserbox(user)">{{
+            user.nick }}
+            <span><i style="padding-left: 10px;" v-if="this.user.realname.includes('irc.chateachat.com:3000')"
+                    @click.stop="nicklist.requestPermision(user, 'public')" aria-hidden="true"
+                    class="fa fa-video-camera"></i></span>
+            <span style="color: red;"><i style="padding-left: 10px;" v-if="cams.watchingUsers.includes(user.nick)"
+                    @click.stop="nicklist.closeByEye(user)" aria-hidden="true"
+                    class="fa fa-eye"></i></span>
+            <span style="color: red;"><i style="padding-left: 10px;" v-if="this.user.realname.includes('CAMPRIVADA')"
+                    @click.stop="nicklist.requestPermision(user, 'private')" aria-hidden="true"
+                    class="fa fa-video-camera"></i></span>
+
+        </span>
+
+
+
         <div class="kiwi-nicklist-user-buttons">
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                class="kiwi-nicklist-user-typing"
-                :class="{
-                    'kiwi-nicklist-user-typing--active': userTypingState === 'active',
-                    'kiwi-nicklist-user-typing--paused': userTypingState === 'paused',
-                }"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="kiwi-nicklist-user-typing" :class="{
+                'kiwi-nicklist-user-typing--active': userTypingState === 'active',
+                'kiwi-nicklist-user-typing--paused': userTypingState === 'paused',
+            }">
                 <circle cx="4" cy="12" r="3" />
                 <circle cx="12" cy="12" r="3" />
                 <circle cx="20" cy="12" r="3" />
             </svg>
 
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 36 36"
-                class="kiwi-nicklist-user-message"
-                @click.stop="nicklist.openQuery(user)"
-            >
-                <path
-                    d="M18 1C8.059 1 0 7.268 0 15c0 4.368 2.574 8.268 6.604 10.835C6.08 28.144
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" class="kiwi-nicklist-user-message"
+                @click.stop="nicklist.openQuery(user)">
+                <path d="M18 1C8.059 1 0 7.268 0 15c0 4.368 2.574 8.268 6.604 10.835C6.08 28.144
                         4.859 31.569 2 35c5.758-.96 9.439-3.761 11.716-6.416c1.376.262 2.805.416
-                        4.284.416c9.941 0 18-6.268 18-14S27.941 1 18 1z"
-                />
+                        4.284.416c9.941 0 18-6.268 18-14S27.941 1 18 1z" />
             </svg>
         </div>
     </div>
@@ -75,6 +58,12 @@ export default {
         UserAvatar,
     },
     props: ['network', 'user', 'nicklist'],
+    data() {
+        return {
+            cams: window.kiwi.cams
+
+        }
+    },
     computed: {
         dataAttributes() {
             const attrs = Object.create(null);
@@ -102,7 +91,6 @@ export default {
         },
         userTypingState() {
             const status = this.user.typingStatus(this.nicklist.buffer.name).status;
-            // console.log('userTypingState', this.user.nick, status);
             return status;
         },
     },
@@ -178,7 +166,7 @@ export default {
         visibility: visible;
     }
 
-    > circle {
+    >circle {
         opacity: 0.2;
         animation: 1.2s blink infinite;
         animation-play-state: paused;
@@ -192,7 +180,7 @@ export default {
         }
     }
 
-    &--active > circle {
+    &--active>circle {
         animation-play-state: running;
     }
 

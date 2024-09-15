@@ -193,10 +193,15 @@ export default {
             }
         },
         requestPermision(user,camState) {
-            this.$state.$emit('request.'+camState, user, this.network, {
+            this.$state.$emit('cam.request.'+camState, user, this.network, {
                 buffer: this.buffer,
             });
         },
+        closeByEye(user){
+            this.$state.$emit('cam.close.eye', user, this.network, {
+                buffer: this.buffer,
+            });
+        }
     },
 };
 </script>

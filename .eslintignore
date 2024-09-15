@@ -2,3 +2,5 @@ build/*.js
 config/*.js
 tests/unit/coverage/
 src/components/*.vue
+src/*.vue
+static/plugins/components/*.vue

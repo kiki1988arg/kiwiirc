@@ -13,7 +13,7 @@
             <div style="background-color: aliceblue;">
 
 
-                <iframe :src="'http://localhost:4000/?user=' + src" frameborder="0" style="height: 250px;"
+                <iframe :src="'https://irc.chateachat.com:3000/?user=' + src" frameborder="0" style="height: 250px;"
                     allow="camera; microphone">
                 </iframe>
             </div>
@@ -25,7 +25,6 @@
 
 <script>
 export default {
-    name: 'DraggableDiv',
     props: ['src', 'index'],
     data: function () {
         return {
@@ -68,7 +67,6 @@ export default {
             this.$refs.draggableContainer.style.left = (this.$refs.draggableContainer.offsetLeft - this.positions.movementX) + 'px'
         }, touchStart: function (event) {
             event.preventDefault()
-            console.log(event.targetTouches)
             // grab the location of touch
             this.positions.movementX = this.positions.clientX - event.targetTouches[0].pageX
             this.positions.movementY = this.positions.clientY - event.targetTouches[0].pageY
@@ -83,15 +81,14 @@ export default {
 
 
         closeDragElement() {
-            console.log('closeDrag')
             document.onmouseup = null
             document.onmousemove = null
             document.ontouchmove = null
             document.ontouchend = null
         },
         closeCam(value) {
-            console.log(value)
-            kiwi.viewedUsers.splice(value, 1);
+            kiwi.cams.viewedUsers.splice(value, 1);
+            this.$state.$emit('cam.close',this.src,this.$state.getActiveNetwork())
         }
 
     }
