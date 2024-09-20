@@ -18,16 +18,22 @@ kiwi.plugin('active-cam', function (kiwi, log) {
             overflow: hidden;
         width: max-content;">
 
+            <div v-if="!this.displayCam" style="float:left;width: 300px;
+            height: 250px;
+            background: black;"></div>
+
             <li v-if="this.displayCam" style="float: left;margin-right: 20px;" > <iframe id="camera-preview" :src="this.getIframe()" frameborder="0" style=" 
                 height: 250px;
                             
                             float: left;" allow="camera; microphone">
-                </iframe></li>
+                </iframe>
+            </li>
+       
 
              <li v-for="(item, index) in getView" style="float: left;" :key="index">
                 <i class="fa fa-window-close" style="font-size: 26px;float:right" @click="closeCam(item,index)" aria-hidden="true"></i>
 
-                <iframe :src="'https://irc.chateachat.com:3000/?user=' + item" frameborder="0" style="height: 250px; " allow="camera; microphone">
+                <iframe :src="'https://irc.chateachat.com:8443/?user=' + item" frameborder="0" style="height: 250px; " allow="camera; microphone">
                 </iframe>
             </li>
 
@@ -60,7 +66,7 @@ kiwi.plugin('active-cam', function (kiwi, log) {
                 (this.displayCam) ? this.showCamera() : this.hideCamera()
             },
             getIframe() {
-                return 'https://irc.chateachat.com:3000/broadcast.html?user=' + this.$state.getActiveNetwork().nick;
+                return 'https://irc.chateachat.com:8443/broadcast.html?user=' + this.$state.getActiveNetwork().nick;
             },
             requestPermissions() {
                 navigator.mediaDevices.getUserMedia({ video: true, audio: true })
@@ -75,7 +81,7 @@ kiwi.plugin('active-cam', function (kiwi, log) {
                     }).then(() => this.showCamera());
             },
             showCamera() {
-                this.valor1 = 'https://irc.chateachat.com:3000/?user=' + this.$state.getActiveNetwork().nick;
+                this.valor1 = 'https://irc.chateachat.com:8443/?user=' + this.$state.getActiveNetwork().nick;
                 // Envia el comando para mostrar la cÃ¡mara
                 const network = this.$state.getActiveNetwork();
                 if (network && this.valor1) {
@@ -84,9 +90,9 @@ kiwi.plugin('active-cam', function (kiwi, log) {
 
             },
             privateCamera() {
-                    const network = this.$state.getActiveNetwork();
-                    network.ircClient.raw(`setname CAMPRIVADA`);
-                
+                const network = this.$state.getActiveNetwork();
+                network.ircClient.raw(`setname CAMPRIVADA`);
+
             },
             hideCamera() {
                 const network = this.$state.getActiveNetwork();
@@ -95,9 +101,8 @@ kiwi.plugin('active-cam', function (kiwi, log) {
                 }
             },
             closeCam(nick, index) {
-                console.log(this.$state.getActiveNetwork);
                 kiwi.cams.viewedUsers.splice(index, 1);
-                this.$state.$emit('cam.close', nick, this.$state.getActiveNetwork())
+                this.$state.$emit('cam.close', nick)
             }
 
 
@@ -109,7 +114,7 @@ kiwi.plugin('active-cam', function (kiwi, log) {
             kiwi.cams.viewedUsers.splice(0, kiwi.cams.viewedUsers.length)
         },
         mounted() {
-
+            console.log(kiwi);
         },
     })
 

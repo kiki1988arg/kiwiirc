@@ -9,6 +9,7 @@
             <component :is="startupComponent" @start="startUp" />
         </template>
         <template v-else>
+            <PopUpList/>
             <state-browser :networks="networks" :sidebar-state="sidebarState" />
             <div :class="{
                 'kiwi-workspace--disconnected': network && network.state !== 'connected'
@@ -53,6 +54,7 @@ import { State as SidebarState } from '@/components/Sidebar';
 import * as Notifications from '@/libs/Notifications';
 import * as bufferTools from '@/libs/bufferTools';
 import Logger from '@/libs/Logger';
+import PopUpList from '@/components//PopUpList.vue';
 
 let log = Logger.namespace('App.vue');
 
@@ -63,6 +65,7 @@ export default {
         ControlInput,
         MediaViewer,
         AvatarCommon,
+        PopUpList
     },
     props: ['startupComponent'],
     data() {

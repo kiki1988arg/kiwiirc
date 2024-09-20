@@ -2,18 +2,24 @@
     <div>
 
         <div ref="draggableContainer" id="draggable-container" v-bind:style="{ top: 50 + index * 3.25 + '%' }">
-            <i class="fa fa-window-close" style="font-size: 22px;float:right;transform: translateY(22px);" @click="closeCam(index)"
-                        aria-hidden="true"></i>
+
+        
+            <i class="fa fa-window-close" style="margin: 0px 3px;font-size: 22px;float:right;transform: translateY(22px);" @click="closeCam(index)"
+            aria-hidden="true"></i>
+            <i class="fa fa-window-maximize" v-if="!this.isOpen" style="margin: 0px 3px;font-size: 22px;float:right;transform: translateY(22px);" @click="toggleIsOpen(index)"
+            aria-hidden="true"></i>
+            <i class="fa fa-window-minimize" v-if="this.isOpen" style="margin: 0px 3px;font-size: 22px;float:right;transform: translateY(22px);" @click="toggleIsOpen(index)"
+            aria-hidden="true"></i>
             <div id="draggable-header" @mousedown.prevent="dragMouseDown" @touchstart.prevent="touchDown">
                 <div class="header">{{ src }}
                     
 
                 </div>
             </div>
-            <div style="background-color: aliceblue;">
+            <div v-show="this.isOpen" style="background-color: aliceblue; ">
 
 
-                <iframe :src="'https://irc.chateachat.com:3000/?user=' + src" frameborder="0" style="height: 250px;"
+                <iframe  :src="'https://irc.chateachat.com:8443/?user=' + src" frameborder="0" style="height: 250px;"
                     allow="camera; microphone">
                 </iframe>
             </div>
@@ -35,6 +41,7 @@ export default {
                 movementY: 0,
 
             },
+            isOpen: true
 
 
         }
@@ -89,6 +96,10 @@ export default {
         closeCam(value) {
             kiwi.cams.viewedUsers.splice(value, 1);
             this.$state.$emit('cam.close',this.src,this.$state.getActiveNetwork())
+        },
+
+        toggleIsOpen() {
+            this.isOpen = !this.isOpen
         }
 
     }
@@ -109,6 +120,7 @@ export default {
     z-index: 10;
     left: 200px;
     top: 200px;
+    margin-right: 55px;
 }
 
 .header {
@@ -117,6 +129,6 @@ export default {
     bottom: -20px;
     transform: translateY(11px);
     cursor: grab;
-    width: 275px;
+    width: 245px;
 }
 </style>

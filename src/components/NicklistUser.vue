@@ -10,7 +10,7 @@
         <span class="kiwi-nicklist-user-prefix">{{ userModePrefix }}</span>
         <span class="kiwi-nicklist-user-nick" :style="{ color: userColour }" @click.stop="nicklist.openUserbox(user)">{{
             user.nick }}
-            <span><i style="padding-left: 10px;" v-if="this.user.realname.includes('irc.chateachat.com:3000')"
+            <span><i style="padding-left: 10px;" v-if="this.user.realname.includes('irc.chateachat.com')"
                     @click.stop="nicklist.requestPermision(user, 'public')" aria-hidden="true"
                     class="fa fa-video-camera"></i></span>
             <span style="color: red;"><i style="padding-left: 10px;" v-if="cams.watchingUsers.includes(user.nick)"

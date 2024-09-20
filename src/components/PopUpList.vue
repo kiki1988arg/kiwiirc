@@ -10,9 +10,9 @@
 </template>
 <script>
 import PopUp from '@/components/PopUp';
-let Vue = require('vue');
 
-export default Vue.component('popup', {
+
+export default  {
     components: {      
         PopUp,
     },
@@ -28,7 +28,7 @@ export default Vue.component('popup', {
     
    
     
-})
+}
 </script>
 <style lang="">
     

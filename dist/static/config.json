@@ -52,6 +52,11 @@
             "name": "cam-popup",
             "url": "static/plugins/cam-popup.js"
         }
+        ,
+        {
+            "name": "icon",
+            "url": "static/plugins/icon.js"
+        }
     ],
     "startupOptions": {
         "channel": "#kiwiirc-default",
